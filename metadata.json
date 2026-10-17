@@ -1,0 +1,8 @@
+{
+  "name": "قَبْضَة | Qabdah",
+  "description": "تطبيق مالي شخصي متكامل لإدارة الميزانيات، وتتبع المصروفات والدخل، والديون، وأهداف الادخار، مع مساعد مالي ذكي وفحص الفواتير.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

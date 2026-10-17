@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function() {
+        // Prevent unhandled rejections or error alerts from Vite dev HMR websocket
+        window.addEventListener('unhandledrejection', function(event) {
+          if (
+            event.reason &&
+            ((event.reason.message && event.reason.message.includes('WebSocket')) ||
+             (typeof event.reason === 'string' && event.reason.includes('WebSocket')) ||
+             (event.reason.stack && event.reason.stack.includes('createWebSocketModuleRunnerTransport')))
+          ) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        }, true);
+
+        window.addEventListener('error', function(event) {
+          if (event.message && event.message.includes('websocket')) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        }, true);
+
+        // Intercept Vite HMR WebSocket connection to avoid connection errors in Cloud Run
+        var NativeWebSocket = window.WebSocket;
+        if (NativeWebSocket) {
+          window.WebSocket = function(url, protocols) {
+            var isHmr = false;
+            if (
+              protocols === 'vite-hmr' ||
+              (Array.isArray(protocols) && protocols.includes('vite-hmr')) ||
+              (typeof url === 'string' && (url.includes('token=') || url.includes('24678') || url.includes('/@vite/client')))
+            ) {
+              isHmr = true;
+            }
+            if (isHmr) {
+              var target = new EventTarget();
+              target.binaryType = 'blob';
+              target.bufferedAmount = 0;
+              target.extensions = '';
+              target.protocol = 'vite-hmr';
+              target.readyState = 1; // OPEN
+              target.url = url;
+              target.send = function() {};
+              target.close = function() { target.readyState = 3; };
+              setTimeout(function() {
+                var openEvt = new Event('open');
+                if (typeof target.onopen === 'function') target.onopen(openEvt);
+                target.dispatchEvent(openEvt);
+              }, 0);
+              return target;
+            }
+            return new NativeWebSocket(url, protocols);
+          };
+          window.WebSocket.prototype = NativeWebSocket.prototype;
+          window.WebSocket.CONNECTING = 0;
+          window.WebSocket.OPEN = 1;
+          window.WebSocket.CLOSING = 2;
+          window.WebSocket.CLOSED = 3;
+        }
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>قَبْضَة | Qabdah - فلوسك في إيدك، ومستقبلك في حسابك</title>
+    <meta name="description" content="تطبيق مالي شخصي متكامل لإدارة الميزانيات، وتتبع المصروفات والدخل، والديون، وأهداف الادخار، مع مساعد مالي ذكي وفحص الفواتير." />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="قَبْضَة | Qabdah - فلوسك في إيدك، ومستقبلك في حسابك" />
+    <meta property="og:description" content="تطبيق مالي شخصي متكامل لإدارة الميزانيات، وتتبع المصروفات والدخل، والديون، وأهداف الادخار، مع مساعد مالي ذكي وفحص الفواتير." />
+    <meta property="og:site_name" content="قَبْضَة | Qabdah" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="قَبْضَة | Qabdah" />
+    <meta name="twitter:description" content="فلوسك في إيدك، ومستقبلك في حسابك." />
+
+    <!-- Theme & Icons -->
+    <meta name="theme-color" content="#064e3b" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- Google Fonts: Cairo, Tajawal & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased selection:bg-emerald-500 selection:text-white dark:bg-slate-950 dark:text-slate-100 min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

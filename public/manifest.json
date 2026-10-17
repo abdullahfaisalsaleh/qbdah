@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "قَبْضَة | Qabdah",
+  "short_name": "قَبْضَة",
+  "description": "تطبيق مالي شخصي متكامل لإدارة الميزانيات وتتبع المصروفات والدخل والديون والادخار",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#064e3b",
+  "theme_color": "#064e3b",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
