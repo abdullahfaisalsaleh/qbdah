@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Navbar } from './components/Navbar.tsx';
 import { LandingPage } from './components/LandingPage.tsx';
 import { DashboardView } from './components/DashboardView.tsx';
@@ -23,6 +24,10 @@ import { AdminDashboardView } from './components/AdminDashboardView.tsx';
 import { AdBanner } from './components/AdBanner.tsx';
 import { InstallPrompt } from './components/InstallPrompt.tsx';
 import { CurrencyConverterModal } from './components/CurrencyConverterModal.tsx';
+import { AboutUsModal } from './components/AboutUsModal.tsx';
+import { ContactUsModal } from './components/ContactUsModal.tsx';
+import { PrivacyPolicyModal } from './components/PrivacyPolicyModal.tsx';
+import { TermsOfServiceModal } from './components/TermsOfServiceModal.tsx';
 import { CurrencyService } from './services/currencyService.ts';
 
 import {
@@ -40,6 +45,17 @@ import {
   UserProfile,
 } from './types/index.ts';
 import { StorageService } from './services/storage.ts';
+
+const APP_NAV_TABS = [
+  { id: 'dashboard', labelAr: 'لوحة التحكم', labelEn: 'Dashboard' },
+  { id: 'transactions', labelAr: 'المعاملات', labelEn: 'Transactions' },
+  { id: 'accounts', labelAr: 'الحسابات والمحافظ', labelEn: 'Accounts' },
+  { id: 'budgets', labelAr: 'الميزانيات', labelEn: 'Budgets' },
+  { id: 'debts', labelAr: 'الديون والسلف', labelEn: 'Debts' },
+  { id: 'savings', labelAr: 'أهداف الادخار', labelEn: 'Savings' },
+  { id: 'bills', labelAr: 'الفواتير', labelEn: 'Bills' },
+  { id: 'reports', labelAr: 'التقارير المالية', labelEn: 'Reports' },
+];
 
 export default function App() {
   // Session & Preferences State
@@ -69,6 +85,12 @@ export default function App() {
   const [settingsInitialTab, setSettingsInitialTab] = useState('general');
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isCurrencyConverterOpen, setIsCurrencyConverterOpen] = useState(false);
+
+  // Policy & Transparency Modals
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
 
   // Live Exchange Rates State (USD base)
   const [exchangeRates, setExchangeRates] = useState<Partial<Record<CurrencyCode, number>>>(
@@ -130,6 +152,37 @@ export default function App() {
     StorageService.setCurrentUser(null);
     setUser(null);
     setActiveTab('landing');
+  };
+
+  // Horizontal touch navigation handlers ("تحود يمين وشمال")
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartYRef.current;
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+
+    // Minimum 45px swipe and horizontal magnitude must exceed vertical scroll
+    if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      if (!user || activeTab === 'landing') return;
+      const currentIndex = APP_NAV_TABS.findIndex((t) => t.id === activeTab);
+      if (currentIndex === -1) return;
+
+      // In Arabic (RTL): swiping left (negative deltaX) moves to next tab; swiping right (positive deltaX) moves to previous
+      if (deltaX < 0 && currentIndex < APP_NAV_TABS.length - 1) {
+        setActiveTab(APP_NAV_TABS[currentIndex + 1].id);
+      } else if (deltaX > 0 && currentIndex > 0) {
+        setActiveTab(APP_NAV_TABS[currentIndex - 1].id);
+      }
+    }
   };
 
   // --- Transactions Handlers ---
@@ -413,10 +466,18 @@ export default function App() {
         }}
         onSignOut={handleSignOut}
         onMarkNotificationsRead={handleMarkNotificationsRead}
+        onOpenAbout={() => setIsAboutOpen(true)}
+        onOpenContact={() => setIsContactOpen(true)}
+        onOpenPrivacy={() => setIsPrivacyOpen(true)}
+        onOpenTerms={() => setIsTermsOpen(true)}
       />
 
       {/* Main View Router */}
-      <main className="flex-1">
+      <main
+        className="flex-1 overscroll-x-contain pb-16 md:pb-6"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {!user || activeTab === 'landing' ? (
           <LandingPage
             language={language}
@@ -433,6 +494,11 @@ export default function App() {
               setIsAuthOpen(true);
             }}
             onOpenSubscriptions={() => setIsSubscriptionsOpen(true)}
+            onOpenAbout={() => setIsAboutOpen(true)}
+            onOpenContact={() => setIsContactOpen(true)}
+            onOpenPrivacy={() => setIsPrivacyOpen(true)}
+            onOpenTerms={() => setIsTermsOpen(true)}
+            onOpenCurrencyConverter={() => setIsCurrencyConverterOpen(true)}
           />
         ) : activeTab === 'dashboard' ? (
           <DashboardView
@@ -538,6 +604,53 @@ export default function App() {
         ) : null}
       </main>
 
+      {/* Mobile Floating Horizontal Navigation Pill ("تحود يمين وشمال") */}
+      {user && activeTab !== 'landing' && (
+        <aside aria-label="شريط التحويد السريع بين الأقسام" className="xl:hidden fixed bottom-4 inset-x-0 z-30 flex justify-center px-4 pointer-events-none">
+          <div className="pointer-events-auto flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-xl border border-slate-200 dark:border-slate-800 text-xs transition-transform">
+            {/* Turn right / previous in RTL */}
+            <button
+              onClick={() => {
+                const idx = APP_NAV_TABS.findIndex((t) => t.id === activeTab);
+                if (idx > 0) setActiveTab(APP_NAV_TABS[idx - 1].id);
+              }}
+              disabled={APP_NAV_TABS.findIndex((t) => t.id === activeTab) <= 0}
+              className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition text-slate-700 dark:text-slate-300 flex items-center gap-1 active:scale-95"
+              title={language === 'ar' ? 'تحويد لليمين (السابق)' : 'Previous tab'}
+              aria-label={language === 'ar' ? 'السابق' : 'Previous'}
+            >
+              {language === 'ar' ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </button>
+
+            {/* Current tab title & indicator */}
+            <div className="px-2 text-center min-w-[110px]">
+              <span className="font-bold text-slate-900 dark:text-slate-100 block text-[11px] truncate">
+                {language === 'ar'
+                  ? APP_NAV_TABS.find((t) => t.id === activeTab)?.labelAr
+                  : APP_NAV_TABS.find((t) => t.id === activeTab)?.labelEn}
+              </span>
+              <span className="text-[9px] text-slate-400 block font-mono">
+                {APP_NAV_TABS.findIndex((t) => t.id === activeTab) + 1} / {APP_NAV_TABS.length} • {language === 'ar' ? 'اسحب يمين وشمال' : 'Swipe ↔'}
+              </span>
+            </div>
+
+            {/* Turn left / next in RTL */}
+            <button
+              onClick={() => {
+                const idx = APP_NAV_TABS.findIndex((t) => t.id === activeTab);
+                if (idx < APP_NAV_TABS.length - 1) setActiveTab(APP_NAV_TABS[idx + 1].id);
+              }}
+              disabled={APP_NAV_TABS.findIndex((t) => t.id === activeTab) >= APP_NAV_TABS.length - 1}
+              className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition text-slate-700 dark:text-slate-300 flex items-center gap-1 active:scale-95"
+              title={language === 'ar' ? 'تحويد للشمال (التالي)' : 'Next tab'}
+              aria-label={language === 'ar' ? 'التالي' : 'Next'}
+            >
+              {language === 'ar' ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </button>
+          </div>
+        </aside>
+      )}
+
       {/* Ad banner container for Free users */}
       {user && (
         <AdBanner
@@ -619,6 +732,10 @@ export default function App() {
             StorageService.setCurrentUser(updated);
           }}
           initialTab={settingsInitialTab}
+          onOpenAbout={() => setIsAboutOpen(true)}
+          onOpenContact={() => setIsContactOpen(true)}
+          onOpenPrivacy={() => setIsPrivacyOpen(true)}
+          onOpenTerms={() => setIsTermsOpen(true)}
         />
       )}
 
@@ -645,6 +762,35 @@ export default function App() {
             StorageService.setCurrentUser(updated);
           }
         }}
+      />
+
+      {/* About Us Modal */}
+      <AboutUsModal
+        isOpen={isAboutOpen}
+        onClose={() => setIsAboutOpen(false)}
+        language={language}
+        onOpenContact={() => setIsContactOpen(true)}
+      />
+
+      {/* Contact Us Modal */}
+      <ContactUsModal
+        isOpen={isContactOpen}
+        onClose={() => setIsContactOpen(false)}
+        language={language}
+      />
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal
+        isOpen={isPrivacyOpen}
+        onClose={() => setIsPrivacyOpen(false)}
+        language={language}
+      />
+
+      {/* Terms of Service Modal */}
+      <TermsOfServiceModal
+        isOpen={isTermsOpen}
+        onClose={() => setIsTermsOpen(false)}
+        language={language}
       />
     </div>
   );

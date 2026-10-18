@@ -15,8 +15,6 @@ import {
   Database,
   Trash2,
   FileCode,
-  FolderArchive,
-  Terminal,
   Sparkles,
 } from 'lucide-react';
 import { CurrencyCode, Language, Theme, UserProfile } from '../types/index.ts';
@@ -35,6 +33,10 @@ interface SettingsModalProps {
   setCurrency: (curr: CurrencyCode) => void;
   onUpdateUser: (u: UserProfile) => void;
   initialTab?: string;
+  onOpenAbout?: () => void;
+  onOpenContact?: () => void;
+  onOpenPrivacy?: () => void;
+  onOpenTerms?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -49,6 +51,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   setCurrency,
   onUpdateUser,
   initialTab = 'general',
+  onOpenAbout,
+  onOpenContact,
+  onOpenPrivacy,
+  onOpenTerms,
 }) => {
   const isAr = language === 'ar';
   const [activeTab, setActiveTab] = useState<'general' | 'supabase' | 'backup'>(initialTab as any);
@@ -86,21 +92,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     a.download = `qabdah_backup_${user.name}_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const handleDownloadProjectZip = () => {
-    const a = document.createElement('a');
-    a.href = '/api/export/project-zip';
-    a.download = 'qabdah-project-source.zip';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setBackupStatus({
-      type: 'success',
-      message: isAr
-        ? 'بدأ تحميل حزمة ملفات التطبيق (ZIP) بنجاح!'
-        : 'Project source code ZIP download started!',
-    });
   };
 
   const handleUploadBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -365,54 +356,69 @@ CREATE POLICY "Users can manage own transactions" ON public.transactions FOR ALL
               </div>
             )}
 
-            {/* DOWNLOAD FULL PROJECT CODE ZIP */}
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50 to-slate-50 dark:from-indigo-950/30 dark:to-slate-800/60 border border-indigo-200 dark:border-indigo-800/60 space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="space-y-1">
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
-                    <FolderArchive className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                    <span>{isAr ? 'تحميل ملفات المشروع كاملة (Source Code ZIP)' : 'Download Full Project Source (ZIP)'}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300">
-                      ZIP
-                    </span>
-                  </h3>
-                  <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                    {isAr
-                      ? 'قم بتحميل الكود المصدري الكامل للتطبيق في ملف مضغوط (ZIP) يشمل الواجهات بالكامل (React + Tailwind + Vite)، الخادم الخلفي (Express + Gemini API)، معالجة الفواتير، ونظام الحسابات والعملات، لاختباره وتشغيله محلياً على حاسوبك الشخصي أو رفعه على خادم خارجي.'
-                      : 'Download all project source files in a single clean ZIP archive (Frontend, Backend, APIs, Configs, Tests). Ready to run locally with npm install && npm run dev.'}
-                  </p>
-                </div>
+            {/* POLICIES & SUPPORT TRANSPARENCY */}
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 border border-emerald-200 dark:border-emerald-800/60 space-y-3">
+              <div className="space-y-1">
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>{isAr ? 'السياسات والشفافية والدعم الفني' : 'Policies, Transparency & Support'}</span>
+                </h3>
+                <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                  {isAr
+                    ? 'منصة قَبْضَة تلتزم بأعلى معايير الشفافية وحماية البيانات. يمكنك في أي وقت مراجعة سياسة الخصوصية، شروط الاستخدام، أو التواصل المباشر مع فريق الدعم الفني.'
+                    : 'Qabdah adheres to the highest privacy and transparency standards. Review our terms, privacy disclosures, or contact our support team.'}
+                </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={handleDownloadProjectZip}
-                  className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-md shadow-indigo-600/20 flex items-center gap-2 text-xs active:scale-95 cursor-pointer"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>{isAr ? 'تحميل كود المشروع الآن (ZIP)' : 'Download Project ZIP Now'}</span>
-                </button>
-                <a
-                  href="/api/export/project-zip"
-                  download="qabdah-project-source.zip"
-                  className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-semibold"
-                >
-                  <span>{isAr ? 'أو عبر رابط مباشر' : 'Direct link'}</span>
-                </a>
-              </div>
-
-              {/* Local run instructions */}
-              <div className="p-3 rounded-xl bg-slate-900 text-slate-200 text-[11px] font-mono space-y-1.5 border border-slate-800">
-                <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-sans font-bold">
-                  <Terminal className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>{isAr ? 'خطوات التشغيل على حاسوبك بعد فك الضغط:' : 'Quickstart after unzipping:'}</span>
-                </div>
-                <div className="text-emerald-400 selection:bg-slate-700">
-                  cd qabdah-project-source<br />
-                  npm install<br />
-                  npm run dev
-                </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs">
+                {onOpenAbout && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenAbout();
+                    }}
+                    className="p-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-bold text-slate-800 dark:text-slate-200 text-center transition shadow-xs"
+                  >
+                    {isAr ? 'من نحن' : 'About Us'}
+                  </button>
+                )}
+                {onOpenPrivacy && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenPrivacy();
+                    }}
+                    className="p-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-bold text-slate-800 dark:text-slate-200 text-center transition shadow-xs"
+                  >
+                    {isAr ? 'سياسة الخصوصية' : 'Privacy Policy'}
+                  </button>
+                )}
+                {onOpenTerms && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenTerms();
+                    }}
+                    className="p-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-bold text-slate-800 dark:text-slate-200 text-center transition shadow-xs"
+                  >
+                    {isAr ? 'شروط الاستخدام' : 'Terms of Use'}
+                  </button>
+                )}
+                {onOpenContact && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenContact();
+                    }}
+                    className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-center transition shadow-xs"
+                  >
+                    {isAr ? 'اتصل بنا' : 'Contact Us'}
+                  </button>
+                )}
               </div>
             </div>
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">

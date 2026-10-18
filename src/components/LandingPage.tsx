@@ -17,8 +17,11 @@ import {
   Zap,
   BarChart3,
   Crown,
+  Mail,
+  HelpCircle,
 } from 'lucide-react';
 import { Language } from '../types/index.ts';
+import { PublicFinancialTools } from './PublicFinancialTools.tsx';
 
 interface LandingPageProps {
   language: Language;
@@ -26,6 +29,11 @@ interface LandingPageProps {
   onSignIn: () => void;
   onTryDemo: () => void;
   onOpenSubscriptions: () => void;
+  onOpenAbout?: () => void;
+  onOpenContact?: () => void;
+  onOpenPrivacy?: () => void;
+  onOpenTerms?: () => void;
+  onOpenCurrencyConverter?: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
@@ -34,6 +42,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onSignIn,
   onTryDemo,
   onOpenSubscriptions,
+  onOpenAbout,
+  onOpenContact,
+  onOpenPrivacy,
+  onOpenTerms,
+  onOpenCurrencyConverter,
 }) => {
   const isAr = language === 'ar';
   const Arrow = isAr ? ArrowLeft : ArrowRight;
@@ -210,7 +223,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-900 rounded-md text-[11px] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                   <Lock className="w-3 h-3 text-emerald-600" />
-                  <span>https://qabdah.app/dashboard</span>
+                  <span>https://qabdah.com/dashboard</span>
                 </div>
                 <div className="text-[10px] text-slate-400 font-mono">v1.0 Pro</div>
               </div>
@@ -463,6 +476,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
+      {/* Free Interactive Public Financial Tools Hub */}
+      <PublicFinancialTools
+        language={language}
+        onOpenLiveConverter={onOpenCurrencyConverter}
+      />
+
       {/* FAQ Section */}
       <section className="py-16 bg-slate-100/70 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -500,31 +519,166 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
-              ق
+      {/* Comprehensive AdSense-Ready Footer */}
+      <footer className="bg-slate-900 text-slate-400 pt-12 pb-8 border-t border-slate-800 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-slate-800">
+            {/* Brand column */}
+            <div className="md:col-span-1 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-white flex items-center justify-center font-black text-sm shadow-md">
+                  ق
+                </div>
+                <span className="font-extrabold text-base text-white">قَبْضَة | Qabdah</span>
+              </div>
+              <p className="text-slate-400 text-xs leading-relaxed">
+                {isAr
+                  ? 'منصة مالية شخصية متكاملة تهدف لتمكين الأفراد والعائلات في مصر والعالم العربي من إدارة الميزانيات وتتبع المصروفات وسداد الديون بأمان تام.'
+                  : 'Empowering individuals and families across Egypt and the Arab world with private personal budgeting, debt payoff tools, and financial clarity.'}
+              </p>
+              <p className="text-[11px] text-slate-500">
+                {isAr ? '📍 القاهرة، جمهورية مصر العربية' : '📍 Cairo, Egypt'}
+              </p>
             </div>
-            <span className="font-extrabold text-slate-800 dark:text-slate-200">قَبْضَة | Qabdah</span>
-            <span>© {new Date().getFullYear()}</span>
+
+            {/* Quick Tools */}
+            <div className="space-y-2">
+              <h4 className="font-bold text-white text-xs uppercase tracking-wider">
+                {isAr ? 'الأدوات المالية المجانية' : 'Free Financial Tools'}
+              </h4>
+              <ul className="space-y-1.5 text-xs">
+                <li>
+                  <a href="#free-tools-hub" className="hover:text-emerald-400 transition">
+                    {isAr ? 'حاسبة الميزانية 50/30/20' : '50/30/20 Budget Calculator'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#free-tools-hub" className="hover:text-emerald-400 transition">
+                    {isAr ? 'حاسبة سداد الديون وتسريع التحرر' : 'Debt Payoff Calculator'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#free-tools-hub" className="hover:text-emerald-400 transition">
+                    {isAr ? 'حاسبة صندوق الطوارئ والأمان' : 'Emergency Fund Target'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#free-tools-hub" className="hover:text-emerald-400 transition">
+                    {isAr ? 'حاسبة أقساط التمويل والقروض' : 'Loan Installment Calculator'}
+                  </a>
+                </li>
+                {onOpenCurrencyConverter && (
+                  <li>
+                    <button
+                      type="button"
+                      onClick={onOpenCurrencyConverter}
+                      className="hover:text-emerald-400 transition text-start"
+                    >
+                      {isAr ? 'محول أسعار العملات الحية' : 'Live Currency Rates'}
+                    </button>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {/* Important Legal & Compliance Links */}
+            <div className="space-y-2">
+              <h4 className="font-bold text-white text-xs uppercase tracking-wider">
+                {isAr ? 'السياسات والشفافية' : 'Transparency & Policies'}
+              </h4>
+              <ul className="space-y-1.5 text-xs">
+                {onOpenAbout && (
+                  <li>
+                    <button
+                      type="button"
+                      onClick={onOpenAbout}
+                      className="hover:text-emerald-400 transition text-start"
+                    >
+                      {isAr ? 'من نحن (عن منصة قبضة)' : 'About Us (Qabdah Mission)'}
+                    </button>
+                  </li>
+                )}
+                {onOpenPrivacy && (
+                  <li>
+                    <button
+                      type="button"
+                      onClick={onOpenPrivacy}
+                      className="hover:text-emerald-400 transition text-start"
+                    >
+                      {isAr ? 'سياسة الخصوصية وملفات الكوكيز' : 'Privacy Policy & Cookies'}
+                    </button>
+                  </li>
+                )}
+                {onOpenTerms && (
+                  <li>
+                    <button
+                      type="button"
+                      onClick={onOpenTerms}
+                      className="hover:text-emerald-400 transition text-start"
+                    >
+                      {isAr ? 'شروط الاستخدام وإخلاء المسؤولية' : 'Terms of Service & Disclaimer'}
+                    </button>
+                  </li>
+                )}
+                {onOpenContact && (
+                  <li>
+                    <button
+                      type="button"
+                      onClick={onOpenContact}
+                      className="hover:text-emerald-400 transition text-start"
+                    >
+                      {isAr ? 'اتصل بنا وقنوات الدعم' : 'Contact Us & Support'}
+                    </button>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {/* Direct Contact info */}
+            <div className="space-y-2">
+              <h4 className="font-bold text-white text-xs uppercase tracking-wider">
+                {isAr ? 'التواصل المباشر' : 'Direct Support'}
+              </h4>
+              <p className="text-xs text-slate-400">
+                {isAr
+                  ? 'فريق الدعم الفني والاستفسارات الإعلانية متاح للرد على رسائلكم خلال 24-48 ساعة.'
+                  : 'Customer support and media inquiries are handled within 24-48 business hours.'}
+              </p>
+              <div className="space-y-1 text-xs">
+                <a
+                  href="mailto:bodyfs2030@gmail.com"
+                  className="text-emerald-400 hover:underline block font-mono"
+                >
+                  bodyfs2030@gmail.com
+                </a>
+                <span className="text-slate-500 block font-mono text-[11px]">
+                  support@qabdah.com
+                </span>
+              </div>
+              {onOpenContact && (
+                <button
+                  type="button"
+                  onClick={onOpenContact}
+                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 font-bold text-xs transition border border-emerald-500/30"
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>{isAr ? 'إرسال رسالة فورية' : 'Send Direct Message'}</span>
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-[11px]">
-            <a
-              href="/api/export/project-zip"
-              download="qabdah-project-source.zip"
-              className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1"
-            >
-              <span>{isAr ? '📦 تحميل كود المشروع بالكامل (ZIP)' : '📦 Download Full Project (ZIP)'}</span>
-            </a>
-            <span>•</span>
-            <span>{isAr ? 'سياسة الخصوصية الصارمة' : 'Privacy Policy'}</span>
-            <span>•</span>
-            <span>{isAr ? 'شروط الاستخدام القانونية' : 'Terms of Service'}</span>
-            <span>•</span>
-            <span>{isAr ? 'مصر والعالم العربي' : 'Egypt & Arab Region'}</span>
+          {/* Bottom Copyright & Disclaimer */}
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
+            <div>
+              <span>قَبْضَة | Qabdah © {new Date().getFullYear()} — </span>
+              <span>{isAr ? 'جميع الحقوق محفوظة' : 'All rights reserved'}</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span>{isAr ? 'حماية تامة للبيانات' : 'Zero-Bank-Credentials Privacy'}</span>
+              <span>•</span>
+              <span>{isAr ? 'مصر والعالم العربي' : 'Egypt & Arab League'}</span>
+            </div>
           </div>
         </div>
       </footer>

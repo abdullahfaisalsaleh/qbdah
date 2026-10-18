@@ -163,7 +163,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const demoUser: UserProfile = {
         id: demoUserId,
         name: isAr ? 'أحمد كمال (حساب تجريبي)' : 'Ahmed Kamal (Demo Account)',
-        email: 'ahmed.demo@qabdah.app',
+        email: 'ahmed.demo@qabdah.com',
         currency: 'EGP',
         language,
         theme: 'light',

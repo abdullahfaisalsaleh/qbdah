@@ -325,6 +325,74 @@ Return strictly in the defined JSON format.`,
 });
 
 /**
+ * Contact Us Endpoint
+ * Accepts verified contact form inquiries and returns a confirmation ticket
+ */
+interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  category: string;
+  subject: string;
+  message: string;
+  createdAt: string;
+  status: 'received' | 'reviewing';
+}
+
+const contactMessages: ContactMessage[] = [];
+
+app.post('/api/contact', (req: Request, res: Response): void => {
+  const { name, email, phone, category = 'general', subject, message } = req.body;
+
+  if (!name || !email || !message) {
+    res.status(400).json({
+      success: false,
+      error: 'يرجى كتابة الاسم والبريد الإلكتروني والرسالة كاملة / Name, email and message are required',
+    });
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(String(email))) {
+    res.status(400).json({
+      success: false,
+      error: 'صيغة البريد الإلكتروني غير صحيحة / Invalid email address format',
+    });
+    return;
+  }
+
+  const msgId = 'msg_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+  const ticketNumber = `QBD-${Date.now().toString().slice(-6)}`;
+  const newMsg: ContactMessage = {
+    id: msgId,
+    name: String(name).trim().slice(0, 100),
+    email: String(email).trim().slice(0, 100),
+    phone: phone ? String(phone).trim().slice(0, 30) : undefined,
+    category: String(category).trim().slice(0, 50),
+    subject: subject ? String(subject).trim().slice(0, 150) : 'استفسار من منصة قبضة',
+    message: String(message).trim().slice(0, 2000),
+    createdAt: new Date().toISOString(),
+    status: 'received',
+  };
+
+  contactMessages.unshift(newMsg);
+  if (contactMessages.length > 500) {
+    contactMessages.pop();
+  }
+
+  console.log(`[Contact Form] Submission received from ${newMsg.name} (${newMsg.email}) - Subject: ${newMsg.subject} - Ticket: ${ticketNumber}`);
+
+  res.json({
+    success: true,
+    messageId: msgId,
+    ticketNumber,
+    message: 'تم استلام رسالتك بنجاح وسيتواصل معك فريق منصة قبضة خلال 24-48 ساعة عمل.',
+    messageEn: 'Your message has been received successfully. Our team will contact you within 24-48 business hours.',
+  });
+});
+
+/**
  * Subscription Checkout Simulator
  */
 app.post('/api/subscription/checkout', (req: Request, res: Response) => {
